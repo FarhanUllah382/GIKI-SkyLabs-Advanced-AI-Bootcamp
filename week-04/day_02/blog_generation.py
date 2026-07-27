@@ -1,5 +1,4 @@
 """
-"""
 Week 4, Day 2 — Conditional Workflow: Blog Generation
 A LangGraph pipeline that generates a blog outline, then a full blog post,
 using the Gemini API via google-genai client.
