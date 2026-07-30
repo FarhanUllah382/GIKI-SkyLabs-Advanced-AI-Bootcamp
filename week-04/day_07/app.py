@@ -321,4 +321,167 @@ if graph:
 
             "No conversations yet."
 
-        )
+        )  
+        
+        # -------------------------------------------------------
+# Main Chat Area
+# -------------------------------------------------------
+
+for message in st.session_state.history:
+
+    if hasattr(message, "type"):
+
+        role = "assistant" if message.type == "ai" else "user"
+
+        with st.chat_message(role):
+
+            st.markdown(message.content)
+
+    else:
+
+        role, text = message
+
+        with st.chat_message(role):
+
+            st.markdown(text)
+            
+        # -------------------------------------------------------
+# Chat Input
+# -------------------------------------------------------
+
+user_prompt = st.chat_input(
+    "Ask me anything..."
+)
+
+if user_prompt and graph:
+
+    with st.chat_message("user"):
+
+        st.markdown(user_prompt)
+
+    st.session_state.history.append(
+
+        ("user", user_prompt)
+
+    )
+
+    with st.chat_message("assistant"):
+
+        placeholder = st.empty()
+
+        response_text = ""
+
+        for token in graph.stream(
+
+            {
+
+                "messages": [
+
+                    HumanMessage(
+
+                        content=user_prompt
+
+                    )
+
+                ]
+
+            },
+
+            {
+
+                "configurable": {
+
+                    "thread_id":
+
+                    st.session_state.thread_id
+
+                }
+
+            },
+
+        ):
+
+            response_text += token
+
+            placeholder.markdown(response_text + "▌")
+
+        placeholder.markdown(response_text)
+
+    st.session_state.history.append(
+
+        ("assistant", response_text)
+
+    )
+    
+    # -------------------------------------------------------
+# Token Counter
+# -------------------------------------------------------
+
+st.sidebar.divider()
+
+st.sidebar.header("📈 Usage")
+
+estimated = estimate_tokens(
+
+    st.session_state.history
+
+)
+
+st.sidebar.metric(
+
+    "Estimated Tokens",
+
+    estimated,
+
+)
+# -------------------------------------------------------
+# Export Chat
+# -------------------------------------------------------
+
+st.sidebar.divider()
+
+st.sidebar.header("⬇ Export")
+
+history_text = ""
+
+for item in st.session_state.history:
+
+    if isinstance(item, tuple):
+
+        role, text = item
+
+        history_text += f"{role.upper()}:\n"
+
+        history_text += text
+
+        history_text += "\n\n"
+
+    else:
+
+        history_text += item.content
+
+        history_text += "\n\n"
+
+st.sidebar.download_button(
+
+    "Download TXT",
+
+    history_text,
+
+    file_name="conversation.txt",
+
+)
+
+markdown = "# Conversation\n\n"
+
+markdown += history_text
+
+st.sidebar.download_button(
+
+    "Download Markdown",
+
+    markdown,
+
+    file_name="conversation.md",
+
+)   
