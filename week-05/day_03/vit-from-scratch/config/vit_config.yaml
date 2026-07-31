@@ -1,0 +1,37 @@
+# ---------------------------------------------------------
+# Vision Transformer config — small ViT for CIFAR-10
+# ---------------------------------------------------------
+
+model:
+  image_size: 32          # CIFAR-10 images are 32x32
+  patch_size: 4            # -> (32/4)^2 = 64 patches per image
+  in_channels: 3
+  num_classes: 10
+  d_model: 192              # embedding dimension per token
+  depth: 6                  # number of transformer encoder blocks
+  num_heads: 3               # d_model must be divisible by num_heads
+  mlp_ratio: 4.0             # MLP hidden dim = d_model * mlp_ratio
+  dropout: 0.1
+  attn_dropout: 0.0
+  use_pos_embed: true        # toggle off for the "no positional embedding" exercise
+
+data:
+  dataset: "cifar10"
+  data_dir: "./data"
+  batch_size: 128
+  num_workers: 2
+  augment: true              # random crop + horizontal flip
+
+training:
+  output_dir: "./outputs/vit-run"
+  epochs: 30
+  learning_rate: 3.0e-4
+  weight_decay: 0.05
+  warmup_epochs: 5
+  optimizer: "adamw"
+  lr_scheduler: "cosine"
+  label_smoothing: 0.1
+  grad_clip_norm: 1.0
+  log_interval: 50
+  save_every_epoch: true
+  device: "cuda"              # falls back to cpu automatically if unavailable
